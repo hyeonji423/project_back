@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt')
 exports.postAuth = async(request, response) => {
   const {username, email, password} = request.body
 
+  console.log(username, email, password);
+
   try {
     const result = await database.pool.query('SELECT * FROM users WHERE email = $1', [email])
     // console.log(result.rows);
@@ -22,4 +24,13 @@ exports.postAuth = async(request, response) => {
   catch (error) {
     return response.status(500).json({msg: '회원정보 입력 오류 : '+error})
   }
+}
+
+exports.postLogin = async(request, response) => {
+  const { email, password } = request.body
+  // console.log(email, password);
+
+  // 1. 이메일 존재 여부 확인
+  // 2. 비밀번호 복호화 → 비밀번호 일치 여부 확인
+  // 3. 회원정보 jsonwebtoken 생성
 }
