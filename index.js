@@ -2,6 +2,7 @@ const PORT = 8000;
 
 const express = require("express");
 const cors = require("cors");
+const path = require('path')
 const authRouter = require('./routes/authRoutes')
 
 const app = express();
@@ -14,6 +15,6 @@ app.get("/", (req, res) => {
 });
 
 app.use('/auth', authRouter) // http://localhost:8000/auth/register 엔드포인트
-
+app.use('/upload', express.static(path.join(__dirname, 'upload'))) // 이미지 경로가 단순 문자열이 아닌 실제 경로 형태로 변경해주는 미들웨어 코드
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
