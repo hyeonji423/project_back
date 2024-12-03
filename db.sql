@@ -19,7 +19,7 @@ CREATE TABLE mymedicine (
     medi_name VARCHAR(255) NOT NULL,   -- 약품 이름
     company_name VARCHAR(255),         -- 회사 이름 (NULL 가능)
     buying_date DATE,                  -- 구매 날짜 (NULL 가능)
-    exp_date INT NOT NULL,             -- 유효기간 (년 단위)
+    exp_date DATE NOT NULL,             -- 유효기간 (년 단위)
     main_symptom VARCHAR(255),         -- 주요 증상 (NULL 가능)
     memo TEXT,                         -- 메모 (NULL 가능)
     user_id INT,                       -- 사용자 ID (외래 키로 사용)

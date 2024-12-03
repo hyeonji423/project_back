@@ -61,6 +61,9 @@ exports.postLogin = async (request, response) => {
   // console.log(email, password);
 
   try {
+    // JWT_SECRET 값 확인을 위한 콘솔 로그 추가
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
     // 1. 이메일 존재 여부 확인
     const result = await database.pool.query(
       "SELECT * FROM users WHERE email = $1",
@@ -90,8 +93,6 @@ exports.postLogin = async (request, response) => {
       {
         id: result.rows[0].id,
         email: result.rows[0].email,
-        username: result.rows[0].username,
-        profile_img: result.rows[0].profile_img,
       },
       process.env.JWT_SECRET,
       { expiresIn: "3h" }

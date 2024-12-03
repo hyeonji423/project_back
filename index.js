@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const authRouter = require("./routes/authRoutes");
+const myPageRouter = require("./routes/myPageRoutes");
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRouter); // http://localhost:8000/auth/register
+app.use("/myPage", myPageRouter); // http://localhost:8000/myPage/myMedi
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
