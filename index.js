@@ -19,6 +19,6 @@ app.get("/", (req, res) => {
 
 app.use("/auth", authRouter); // http://localhost:8000/auth/register
 app.use("/myPage", myPageRouter); // http://localhost:8000/myPage/myMedi
-app.use("/getMyMedi", getMyMediRouter); // http://localhost:8000/getMyMedi/user_id
+
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
