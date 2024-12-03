@@ -1,12 +1,4 @@
 CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  username VARCHAR(30) NOT NULL,
-  email VARCHAR(40) NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE users (
     id SERIAL PRIMARY KEY,            -- 자동 증가하는 기본 키
     email VARCHAR(100) UNIQUE NOT NULL,        -- 이메일 (고유 값)
     password VARCHAR(255) NOT NULL,   -- 비밀번호 (bcrypt 사용 예정)
