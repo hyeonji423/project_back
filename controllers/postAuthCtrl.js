@@ -7,11 +7,12 @@ const jwt = require("jsonwebtoken");
 const ROOT_PATH = "http://localhost:8000";
 
 exports.postAuth = async (request, response) => {
-  const { username, email, password } = request.body;
+  // const id = uuid4();
+  const { email, password, birth_date } = request.body;
 
-  const profileImage = request.file;
+  // const profileImage = request.file;
 
-  console.log(username, email, password, profileImage);
+  console.log(email, password, birth_date); // body에 들어온 값 확인
 
   try {
     const result = await database.pool.query(
@@ -30,23 +31,23 @@ exports.postAuth = async (request, response) => {
     const hashPassword = await bcrypt.hash(password, 10);
     console.log(hashPassword);
 
-    let profileImagePath = null;
+    // let profileImagePath = null;
 
-    if (profileImage) {
-      // body에 이미지가 들어오게 될 경우
-      const imageExtension = path.extname(profileImage.originalname); // 확장자
-      const imageFileName = `${uuid4()}${imageExtension}`; // ex) 1234567890.jpg
-      profileImagePath = `${ROOT_PATH}/upload/${imageFileName}`;
+    // if (profileImage) {
+    //   // body에 이미지가 들어오게 될 경우
+    //   const imageExtension = path.extname(profileImage.originalname); // 확장자
+    //   const imageFileName = `${uuid4()}${imageExtension}`; // ex) 1234567890.jpg
+    //   profileImagePath = `${ROOT_PATH}/upload/${imageFileName}`;
 
-      fs.writeFileSync(
-        path.join(__dirname, "../upload", imageFileName),
-        profileImage.buffer // 이미지 버퍼 형식으로 저장
-      );
-    }
+    //   fs.writeFileSync(
+    //     path.join(__dirname, "../upload", imageFileName),
+    //     profileImage.buffer // 이미지 버퍼 형식으로 저장
+    //   );
+    // }
 
     await database.pool.query(
-      "INSERT INTO users (username, email, password, profile_img) VALUES ($1, $2, $3, $4)",
-      [username, email, hashPassword, profileImagePath]
+      "INSERT INTO users (email, password, birth_date) VALUES ($1, $2, $3)",
+      [email, hashPassword, birth_date]
     );
 
     return response.status(201).json({ msg: "회원가입이 완료되었습니다." });
