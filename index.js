@@ -17,8 +17,8 @@ app.get("/", (req, res) => {
   res.send("auth server test running");
 });
 
-app.use("/auth", authRouter); // http://localhost:8000/auth/register
-app.use("/myPage", myPageRouter); // http://localhost:8000/myPage/myMedi
-
+app.use("/auth", authRouter); // http://localhost:8000/auth
+app.use("/myPage", myPageRouter); // http://localhost:8000/myPage
+// app.use("/search", searchRouter);
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
