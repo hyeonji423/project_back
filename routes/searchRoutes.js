@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const getMediInfoCtrl = require('../controllers/getMediInfoCtrl');
+const { searchMediInfo } = require("../controllers/getMediInfoCtrl");
 
-router.get('/search', getMediInfoCtrl.searchMediInfo);
+router.get("/search", searchMediInfo);
 
 module.exports = router;

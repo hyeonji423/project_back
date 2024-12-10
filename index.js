@@ -5,6 +5,7 @@ const cors = require("cors");
 const path = require("path");
 const authRouter = require("./routes/authRoutes");
 const myPageRouter = require("./routes/myPageRoutes");
+const emailRouter = require("./routes/emailRoutes");
 
 const app = express();
 
@@ -20,5 +21,6 @@ app.get("/", (req, res) => {
 app.use("/auth", authRouter); // http://localhost:8000/auth
 app.use("/myPage", myPageRouter); // http://localhost:8000/myPage
 // app.use("/search", searchRouter);
+app.use("/email", emailRouter);
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
