@@ -1,29 +1,53 @@
 const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 exports.emailCtrl = async (req, res) => {
-  const { title, content, email } = req.body;
+  const { title, content, email, category } = req.body;
 
+  if (!email) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "이메일 주소가 필요합니다." 
+    });
+  }
+  
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.naver.com",
+    port: 465,
+    secure: true,
     auth: {
-      user: "codelab2005@gmail.com", // 보내는 사람 이메일
-      pass: "code3228**", // 이메일 비밀번호 또는 앱 비밀번호
-    },
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASSWORD
+    }
   });
 
   const mailOptions = {
-    from: "codelab2005@gmail.com",
-    to: "codelab2005@gmail.com", // 수신자 이메일
-    subject: "사용자 건의사항",
-    text: `사용자 이메일: ${email}\n\n건의사항: ${title}\n${content}`,
+    from: process.env.EMAIL,
+    to: process.env.EMAIL,
+    subject: `[건의사항] ${category} - ${title}`,
+    text: `
+카테고리: ${category}
+제목: ${title}
+내용: ${content}
+수신받을 이메일: ${email}
+
+이 메일은 자동발송됩니다.
+    `
   };
 
   try {
-    await sendEmail(title, content, email);
-    res.status(200).send("이메일 전송 성공");
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ 
+      success: true, 
+      message: "건의사항이 성공적으로 전송되었습니다." 
+    });
   } catch (error) {
-    res.status(500).send("이메일 전송 실패");
+    console.error('이메일 전송 실패:', error);
+    console.error('자세한 에러:', error.message);
+    return res.status(500).json({ 
+      success: false, 
+      message: "이메일 전송에 실패했습니다.",
+      error: error.message
+    });
   }
-
-  
 };
