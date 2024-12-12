@@ -12,24 +12,27 @@ exports.emailCtrl = async (req, res) => {
   }
   
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.naver.com",
+    port: 465,
+    secure: true,
     auth: {
-      user: process.env.GMAIL,
-      pass: process.env.GMAIL_PASSWORD
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASSWORD
     }
   });
 
   const mailOptions = {
-    from: process.env.GMAIL,
-    to: email,
+    from: process.env.EMAIL,
+    to: process.env.EMAIL,
     subject: `[건의사항] ${category} - ${title}`,
     text: `
-          카테고리: ${category}
-          제목: ${title}
-          내용: ${content}
+카테고리: ${category}
+제목: ${title}
+내용: ${content}
+수신받을 이메일: ${email}
 
-          이 메일은 자동발송됩니다.
-           `,
+이 메일은 자동발송됩니다.
+    `
   };
 
   try {
@@ -40,9 +43,11 @@ exports.emailCtrl = async (req, res) => {
     });
   } catch (error) {
     console.error('이메일 전송 실패:', error);
+    console.error('자세한 에러:', error.message);
     return res.status(500).json({ 
       success: false, 
-      message: "이메일 전송에 실패했습니다." 
+      message: "이메일 전송에 실패했습니다.",
+      error: error.message
     });
   }
 };
