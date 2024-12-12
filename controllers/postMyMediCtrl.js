@@ -15,15 +15,15 @@ exports.postMyMedi = async (request, response) => {
       user_id,
     } = request.body;
 
-    console.log(
-      mediName,
-      companyName,
-      buyingDate,
-      expDate,
-      mainSymptom,
-      memo,
-      user_id
-    ); // body에 들어온 값 확인
+    // console.log(
+    //   mediName,
+    //   companyName,
+    //   buyingDate,
+    //   expDate,
+    //   mainSymptom,
+    //   memo,
+    //   user_id
+    // ); // body에 들어온 값 확인
 
     // 필수 입력값 검증
     if (!mediName || !expDate || !user_id) {
