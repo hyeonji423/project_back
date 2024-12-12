@@ -35,19 +35,15 @@ app.post("/chat", (request, response) => {
     const scriptPath = path.join(__dirname, "chat.py");
     const phythonPath = "python";
 
-
     const result = spawn(phythonPath, [scriptPath, question]);
-
 
     let answer = "";
     let hasResponded = false;
-
 
     // 파이썬 스크립트의 출력을 수신하는 이벤트 리스너
     result.stdout.on("data", (data) => {
       answer += data.toString();
     });
-
 
     // 파이썬 스크립트의 오류를 수신하는 이벤트 리스너
     result.stderr.on("data", (data) => {
@@ -61,7 +57,6 @@ app.post("/chat", (request, response) => {
         });
       }
     });
-
 
     // 파이썬 스크립트의 종료를 수신하는 이벤트 리스너
     result.on("close", (code) => {
@@ -78,8 +73,6 @@ app.post("/chat", (request, response) => {
         }
       }
     });
-
-
   } catch (error) {
     if (!hasResponded) {
       response.status(500).json({ error: error.message });
