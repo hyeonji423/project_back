@@ -51,3 +51,40 @@ exports.emailCtrl = async (req, res) => {
     });
   }
 };
+
+// const createMedicine = async (req, res) => {
+//   try {
+//     const medicineData = req.body;
+//     const { notification, ...medicineInfo } = medicineData;
+
+//     // 약품 정보 저장
+//     const medicine = await Medicine.create(medicineInfo);
+
+//     // 알림 설정이 체크된 경우
+//     if (notification) {
+//       const expDate = new Date(medicineInfo.expDate);
+//       const notificationDate = new Date(expDate);
+//       notificationDate.setDate(notificationDate.getDate() - 7);
+
+//       await Notification.create({
+//         userId: medicineInfo.user_id,
+//         mediId: medicine._id,
+//         mediName: medicineInfo.mediName,
+//         expDate: medicineInfo.expDate,
+//         notificationDate,
+//         email: req.user.email,
+//         isActive: true
+//       });
+//     }
+
+//     res.status(201).json({ 
+//       message: "등록이 완료되었습니다.",
+//       medicine 
+//     });
+//   } catch (error) {
+//     res.status(500).json({ 
+//       message: "처리 중 오류가 발생했습니다.", 
+//       error 
+//     });
+//   }
+// };
