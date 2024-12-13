@@ -1,5 +1,7 @@
 const nodemailer = require("nodemailer");
+const cron = require('node-cron');
 require("dotenv").config();
+const database = require("../database/database");
 
 exports.emailCtrl = async (req, res) => {
   const { title, content, email, category } = req.body;
@@ -52,56 +54,85 @@ exports.emailCtrl = async (req, res) => {
   }
 };
 
-exports.notificationCtrl = async (req, res) => {
+// 매일 오전 9시에 실행되는 cron job
+cron.schedule('30 13 * * *', async () => {
   try {
-    const { userId, mediName, expDate, notificationDate, email, isActive } =
-      req.body;
+    // 유효기간 7일 전인 약품과 사용자 정보 조회
+    const [notifications] = await database.pool.query(`
+      SELECT
+        m.id AS mediId,
+        m.medi_name AS mediName,
+        m.exp_date AS expDate,
+        u.email AS userEmail
+      FROM mymedicine m
+      JOIN users u ON m.user_id = u.id
+      WHERE
+        m.exp_date::date = CURRENT_DATE + INTERVAL '7 days'
+        AND m.notification = true
+    `);
+    console.log("Query result:", notifications);
 
-    if (!email || !mediName || !expDate || !notificationDate) {
-      return res.status(400).json({
-        success: false,
-        message: "필수 정보가 누락되었습니다.",
-      });
+    for (const notification of notifications) {
+      try {
+        await sendNotificationEmail(notification);
+
+        // 알림 발송 기록
+        await database.pool.query(`
+          INSERT INTO notification_logs
+          (medicine_id, sent_date, status)
+          VALUES ($1, NOW(), 'sent')
+        `, [notification.mediId]);
+      } catch (error) {
+        console.error(`알림 발송 실패 (약품 ID: ${notification.mediId}):`, error);
+
+        // 실패 로그 기록
+        await database.pool.query(`
+          INSERT INTO notification_logs
+          (medicine_id, sent_date, status, error_message)
+          VALUES ($1, NOW(), 'failed', $2)
+        `, [notification.mediId, error.message]);
+      }
     }
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.naver.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
+  } catch (error) {
+    console.error('알림 처리 중 오류 발생:', error);
 
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: email,
-      subject: `[알림] ${mediName} 유효기간이 7일 남았습니다`,
-      text: `
+    // 오류 로그 기록
+    await database.pool.query(`
+      INSERT INTO error_logs
+      (error_message, error_date)
+      VALUES ($1, NOW())
+    `, [error.message]);
+  }
+});
+
+async function sendNotificationEmail(notification) {
+  const transporter = nodemailer.createTransport({
+    host: "smtp.naver.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: notification.userEmail,
+    subject: `[알림] ${notification.mediName} 유효기간이 7일 남았습니다`,
+    text: `
 안녕하세요.
-등록하신 의약품 "${mediName}"의 유효기간이 7일 남았음을 알려드립니다.
+등록하신 의약품 "${notification.mediName}"의 유효기간이 7일 남았음을 알려드립니다.
 
-- 의약품명: ${mediName}
-- 유효기간: ${new Date(expDate).toLocaleDateString()}
+- 의약품명: ${notification.mediName}
+- 유효기간: ${new Date(notification.expDate).toLocaleDateString()}
 
 안전한 의약품 사용을 위해 유효기간을 확인해주세요.
 
 이 메일은 자동발송됩니다.
-      `,
-    };
+    `,
+  };
 
-    await transporter.sendMail(mailOptions);
-    return res.status(200).json({
-      success: true,
-      message: "알림 설정이 완료되었습니다.",
-    });
-  } catch (error) {
-    console.error("알림 설정 실패:", error);
-    return res.status(500).json({
-      success: false,
-      message: "알림 설정에 실패했습니다.",
-      error: error.message,
-    });
-  }
-};
+  await transporter.sendMail(mailOptions);
+}

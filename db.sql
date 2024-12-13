@@ -22,3 +22,15 @@ CREATE TABLE mymedicine (
 -- 알림 여부 추가
 ALTER TABLE mymedicine
 ADD COLUMN notification BOOLEAN;
+
+-- 알림설정에 필요한 데이터 선택
+SELECT 
+    m.id AS mediId,
+    m.medi_name AS mediName,
+    m.exp_date AS expDate,
+    m.notification,
+    u.email AS userEmail
+FROM 
+    mymedicine m
+JOIN 
+    users u ON m.user_id = u.id;
