@@ -13,6 +13,7 @@ exports.postMyMedi = async (request, response) => {
       mainSymptom,
       memo,
       user_id,
+      notification
     } = request.body;
 
     // console.log(
@@ -23,6 +24,7 @@ exports.postMyMedi = async (request, response) => {
     //   mainSymptom,
     //   memo,
     //   user_id
+    //   notification
     // ); // body에 들어온 값 확인
 
     // 필수 입력값 검증
@@ -40,11 +42,12 @@ exports.postMyMedi = async (request, response) => {
       expDate,
       mainSymptom || null,
       memo || null,
-      user_id
+      user_id,
+      notification
     ];
 
     await database.pool.query(
-      "INSERT INTO mymedicine (medi_name, company_name, buying_date, exp_date, main_symptom, memo, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      "INSERT INTO mymedicine (medi_name, company_name, buying_date, exp_date, main_symptom, memo, user_id, notification) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
       sanitizedData
     );
 

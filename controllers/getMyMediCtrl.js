@@ -5,7 +5,7 @@ exports.getMyMedi = async (request, response) => {
   // console.log(userId);
   try {
     const result = await database.pool.query(
-      "SELECT m.id AS medicine_id, m.medi_name, m.company_name, m.buying_date, m.exp_date, m.main_symptom, m.memo, m.created_at AS medicine_created_at, u.email AS user_email FROM mymedicine m JOIN users u ON m.user_id = u.id WHERE u.id = $1;",
+      "SELECT m.id AS medicine_id, m.medi_name, m.company_name, m.buying_date, m.exp_date, m.main_symptom, m.memo, m.created_at, m.notification, u.email AS user_email FROM mymedicine m JOIN users u ON m.user_id = u.id WHERE u.id = $1;",
       [userId]
     );
 
