@@ -7,48 +7,40 @@ exports.postMyMedi = async (request, response) => {
     let {
       mediName,
       companyName,
-      buyingDate,
-      expDate,
       mainSymptom,
+      expDate,
+      buyingDate,
       memo,
       user_id,
-      notification
+      notification,
     } = request.body;
-
-    // 날짜 형식 검증 및 변환
-    if (buyingDate) {
-      buyingDate = new Date(buyingDate);
-      if (isNaN(buyingDate.getTime())) {
-        return response.status(400).json({ msg: "구입날짜 형식이 올바르지 않습니다." });
-      }
-    }
-
-    if (expDate) {
-      expDate = new Date(expDate);
-      if (isNaN(expDate.getTime())) {
-        return response.status(400).json({ msg: "유효기간 형식이 올바르지 않습니다." });
-      }
-    }
 
     // 필수 입력값 검증
     if (!mediName || !expDate || !user_id) {
-      return response.status(400).json({ 
-        msg: "필수 입력값이 누락되었습니다. (제품명, 유효기간, 사용자 ID는 필수입니다)" 
+      return response.status(400).json({
+        msg: "필수 입력값이 누락되었습니다. (제품명, 유효기간, 사용자 ID는 필수입니다)",
       });
     }
 
-    // PostgreSQL의 TIMEZONE 설정
-    await database.pool.query("SET timezone = 'Asia/Seoul'");
+    // 한국 시간(KST)으로 변환하는 함수
+    const convertToKST = (date) => {
+      const koreaTime = new Date(date + "T00:00:00+09:00");
+      return koreaTime.toISOString().split("T")[0]; // 날짜만 반환 (yyyy-mm-dd)
+    };
+
+    // `buyingDate`와 `expDate`를 한국 시간으로 변환
+    const sanitizedBuyingDate = buyingDate ? convertToKST(buyingDate) : null;
+    const sanitizedExpDate = convertToKST(expDate);
 
     const sanitizedData = [
       mediName,
       companyName || null,
-      buyingDate || null,
-      expDate,
+      sanitizedBuyingDate, // 변환된 한국 시간 구매 날짜
+      sanitizedExpDate,
       mainSymptom || null,
       memo || null,
       user_id,
-      notification
+      notification,
     ];
 
     await database.pool.query(
@@ -56,7 +48,9 @@ exports.postMyMedi = async (request, response) => {
       sanitizedData
     );
 
-    return response.status(201).json({ msg: "약품이 성공적으로 등록되었습니다." });
+    return response
+      .status(201)
+      .json({ msg: "약품이 성공적으로 등록되었습니다." });
   } catch (error) {
     return response.status(500).json({ msg: "약품정보 입력 오류: " + error });
   }

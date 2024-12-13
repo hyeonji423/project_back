@@ -14,6 +14,7 @@ CREATE TABLE mymedicine (
     exp_date DATE NOT NULL,             -- 유효기간 (년 단위)
     main_symptom VARCHAR(255),         -- 주요 증상 (NULL 가능)
     memo TEXT,                         -- 메모 (NULL 가능)
+    notification BOOLEAN,             -- 알림 여부
     user_id INT,                       -- 사용자 ID (외래 키로 사용)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)  -- 사용자 ID 외래 키
