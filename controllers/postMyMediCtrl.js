@@ -1,11 +1,10 @@
 const database = require("../database/database");
-const path = require("path"); // 경로 지정 모듈
+const path = require("path");
 const ROOT_PATH = "http://localhost:8000";
 
 exports.postMyMedi = async (request, response) => {
- 
   try {
-    const {
+    let {
       mediName,
       companyName,
       buyingDate,
@@ -16,16 +15,20 @@ exports.postMyMedi = async (request, response) => {
       notification
     } = request.body;
 
-    // console.log(
-    //   mediName,
-    //   companyName,
-    //   buyingDate,
-    //   expDate,
-    //   mainSymptom,
-    //   memo,
-    //   user_id
-    //   notification
-    // ); // body에 들어온 값 확인
+    // 날짜 형식 검증 및 변환
+    if (buyingDate) {
+      buyingDate = new Date(buyingDate);
+      if (isNaN(buyingDate.getTime())) {
+        return response.status(400).json({ msg: "구입날짜 형식이 올바르지 않습니다." });
+      }
+    }
+
+    if (expDate) {
+      expDate = new Date(expDate);
+      if (isNaN(expDate.getTime())) {
+        return response.status(400).json({ msg: "유효기간 형식이 올바르지 않습니다." });
+      }
+    }
 
     // 필수 입력값 검증
     if (!mediName || !expDate || !user_id) {
@@ -34,7 +37,9 @@ exports.postMyMedi = async (request, response) => {
       });
     }
 
-    // 선택적 입력값에 대한 기본값 설정
+    // PostgreSQL의 TIMEZONE 설정
+    await database.pool.query("SET timezone = 'Asia/Seoul'");
+
     const sanitizedData = [
       mediName,
       companyName || null,

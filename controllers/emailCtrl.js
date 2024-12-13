@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const cron = require('node-cron');
+const cron = require("node-cron");
 require("dotenv").config();
 const database = require("../database/database");
 
@@ -54,11 +54,11 @@ exports.emailCtrl = async (req, res) => {
   }
 };
 
-// 매일 오전 9시에 실행되는 cron job
-cron.schedule('30 13 * * *', async () => {
+// 9시에 실행되는 cron job
+cron.schedule("0 9 * * *", async () => {
   try {
     // 유효기간 7일 전인 약품과 사용자 정보 조회
-    const [notifications] = await database.pool.query(`
+    const { rows: notifications } = await database.pool.query(` 
       SELECT
         m.id AS mediId,
         m.medi_name AS mediName,
@@ -70,39 +70,52 @@ cron.schedule('30 13 * * *', async () => {
         m.exp_date::date = CURRENT_DATE + INTERVAL '7 days'
         AND m.notification = true
     `);
-    console.log("Query result:", notifications);
+
+    // 디버깅을 위한 로그 추가
+    console.log("조회된 알림 대상:", notifications);
 
     for (const notification of notifications) {
       try {
         await sendNotificationEmail(notification);
 
         // 알림 발송 기록
-        await database.pool.query(`
+        await database.pool.query(
+          `
           INSERT INTO notification_logs
           (medicine_id, sent_date, status)
           VALUES ($1, NOW(), 'sent')
-        `, [notification.mediId]);
+        `,
+          [notification.mediid]
+        );
       } catch (error) {
-        console.error(`알림 발송 실패 (약품 ID: ${notification.mediId}):`, error);
+        console.error(
+          `알림 발송 실패 (약품 ID: ${notification.mediid}):`,
+          error
+        );
 
         // 실패 로그 기록
-        await database.pool.query(`
+        await database.pool.query(
+          `
           INSERT INTO notification_logs
           (medicine_id, sent_date, status, error_message)
           VALUES ($1, NOW(), 'failed', $2)
-        `, [notification.mediId, error.message]);
+        `,
+          [notification.mediId, error.message]
+        );
       }
     }
-
   } catch (error) {
-    console.error('알림 처리 중 오류 발생:', error);
+    console.error("알림 처리 중 오류 발생:", error);
 
     // 오류 로그 기록
-    await database.pool.query(`
+    await database.pool.query(
+      `
       INSERT INTO error_logs
       (error_message, error_date)
       VALUES ($1, NOW())
-    `, [error.message]);
+    `,
+      [error.message]
+    );
   }
 });
 
@@ -119,14 +132,16 @@ async function sendNotificationEmail(notification) {
 
   const mailOptions = {
     from: process.env.EMAIL,
-    to: notification.userEmail,
-    subject: `[알림] ${notification.mediName} 유효기간이 7일 남았습니다`,
+    to: notification.useremail,
+    subject: `[알림] ${notification.mediname} 유효기간이 7일 남았습니다`,
     text: `
 안녕하세요.
-등록하신 의약품 "${notification.mediName}"의 유효기간이 7일 남았음을 알려드립니다.
+등록하신 의약품 "${
+      notification.mediname
+    }"의 유효기간이 7일 남았음을 알려드립니다.
 
-- 의약품명: ${notification.mediName}
-- 유효기간: ${new Date(notification.expDate).toLocaleDateString()}
+- 의약품명: ${notification.mediname}
+- 유효기간: ${new Date(notification.expdate).toLocaleDateString()}
 
 안전한 의약품 사용을 위해 유효기간을 확인해주세요.
 
