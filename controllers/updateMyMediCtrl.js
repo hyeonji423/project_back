@@ -9,7 +9,8 @@ exports.updateMyMedi = async (request, response) => {
     mainSymptom,
     memo,
     user_id,
-    mediId
+    mediId,
+    notification
   } = request.body;
 
   console.log(
@@ -20,7 +21,8 @@ exports.updateMyMedi = async (request, response) => {
     mainSymptom,
     memo,
     user_id,
-    mediId
+    mediId,
+    notification
   ); // body에 들어온 값 확인
 
   if (!mediName || !expDate ) {
@@ -32,7 +34,7 @@ exports.updateMyMedi = async (request, response) => {
 
   try {
     await database.pool.query(
-      "UPDATE mymedicine SET medi_name = $1, company_name = $2, buying_date = $3, exp_date = $4, main_symptom = $5, memo = $6, user_id = $7 WHERE id = $8",
+      "UPDATE mymedicine SET medi_name = $1, company_name = $2, buying_date = $3, exp_date = $4, main_symptom = $5, memo = $6, user_id = $7, notification = $8 WHERE id = $9",
       [
         mediName,
         companyName || null,
@@ -41,6 +43,7 @@ exports.updateMyMedi = async (request, response) => {
         mainSymptom || null,
         memo || null,
         user_id,
+        notification,
         mediId
       ]
     );

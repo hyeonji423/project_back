@@ -18,3 +18,7 @@ CREATE TABLE mymedicine (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)  -- 사용자 ID 외래 키
 );
+
+-- 알림 여부 추가
+ALTER TABLE mymedicine
+ADD COLUMN notification BOOLEAN;
