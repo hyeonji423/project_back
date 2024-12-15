@@ -4,13 +4,13 @@ const path = require("path"); // 경로 지정 모듈
 const fs = require("fs"); // 파일 생성 등 컨트롤 모듈
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const ROOT_PATH = "http://localhost:8000";
+// const ROOT_PATH = "http://localhost:8000";
+
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 exports.postAuth = async (request, response) => {
-  // const id = uuid4();
   const { email, password, birth_date } = request.body;
-
-  // const profileImage = request.file;
 
   console.log(email, password, birth_date); // body에 들어온 값 확인
 
@@ -20,41 +20,75 @@ exports.postAuth = async (request, response) => {
       [email]
     );
 
-    // console.log(result.rows);
-
     if (result.rows.length > 0) {
       return response
         .status(200)
         .json({ msg: "이미 존재하는 이메일 입니다.", success: false });
     }
 
+    // 이메일 발송을 위한 Nodemailer 설정
+    const transporter = nodemailer.createTransport({
+      host: "smtp.naver.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    // 이메일 인증 코드 생성 함수
+    const generateCode = () => {
+      const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let code = "";
+      for (let i = 0; i < 6; i++) {
+        code += characters.charAt(
+          Math.floor(Math.random() * characters.length)
+        );
+      }
+      return code;
+    };
+
+    const verificationCode = generateCode();
+
+    // 이메일 발송
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "이메일 인증 코드",
+      text: `회원가입을 위한 인증 코드는 ${verificationCode} 입니다.`,
+    };
+
+    // 이메일 발송 성공 후 응답 보내기
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("이메일 발송 실패:", error);
+        return response.status(500).send("이메일 발송 실패");
+      }
+
+      console.log("이메일 발송 성공:", info);
+      return response.status(200).json({
+        message: "인증 코드가 이메일로 전송되었습니다.",
+        verificationCode,
+      });
+    });
+
+    // 비밀번호 해싱
     const hashPassword = await bcrypt.hash(password, 10);
     console.log(hashPassword);
 
-    // let profileImagePath = null;
-
-    // if (profileImage) {
-    //   // body에 이미지가 들어오게 될 경우
-    //   const imageExtension = path.extname(profileImage.originalname); // 확장자
-    //   const imageFileName = `${uuid4()}${imageExtension}`; // ex) 1234567890.jpg
-    //   profileImagePath = `${ROOT_PATH}/upload/${imageFileName}`;
-
-    //   fs.writeFileSync(
-    //     path.join(__dirname, "../upload", imageFileName),
-    //     profileImage.buffer // 이미지 버퍼 형식으로 저장
-    //   );
-    // }
-
+    // 사용자 정보 DB에 저장
     await database.pool.query(
       "INSERT INTO users (email, password, birth_date) VALUES ($1, $2, $3)",
       [email, hashPassword, birth_date]
     );
 
-    return response.status(201).json({ msg: "회원가입이 완료되었습니다." });
   } catch (error) {
+    console.error("회원가입 중 오류 발생:", error);
     return response.status(500).json({ msg: "회원정보 입력 오류: " + error });
   }
 };
+
 
 exports.postLogin = async (request, response) => {
   const { email, password } = request.body;
@@ -62,7 +96,7 @@ exports.postLogin = async (request, response) => {
 
   try {
     // JWT_SECRET 값 확인을 위한 콘솔 로그 추가
-    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
     // 1. 이메일 존재 여부 확인
     const result = await database.pool.query(
