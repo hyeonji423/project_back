@@ -5,7 +5,7 @@ const {
   getMediInfo,
 } = require("../controllers/getMediInfoCtrl");
 
-// router.get("/search", searchMediInfo);
+router.get("/search", searchMediInfo);
 router.get("/info", getMediInfo);
 
 module.exports = router;
