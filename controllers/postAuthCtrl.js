@@ -26,6 +26,28 @@ exports.postAuth = async (request, response) => {
         .json({ msg: "이미 존재하는 이메일 입니다.", success: false });
     }
 
+    // 비밀번호 해싱
+    const hashPassword = await bcrypt.hash(password, 10);
+    console.log(hashPassword);
+
+    // 사용자 정보 DB에 저장
+    await database.pool.query(
+      "INSERT INTO users (email, password, birth_date) VALUES ($1, $2, $3)",
+      [email, hashPassword, birth_date]
+    );
+
+    return response.status(200).json({ msg: "회원가입 성공", success: true });
+
+  } catch (error) {
+    console.error("회원가입 중 오류 발생:", error);
+    return response.status(500).json({ msg: "회원정보 입력 오류: " + error });
+  }
+};
+
+exports.sendEmailVerification = async (request, response) => {
+  const { email } = request.body;
+
+  try {
     // 이메일 발송을 위한 Nodemailer 설정
     const transporter = nodemailer.createTransport({
       host: "smtp.naver.com",
@@ -37,8 +59,8 @@ exports.postAuth = async (request, response) => {
       },
     });
 
-    // 이메일 인증 코드 생성 함수
-    const generateCode = () => {
+     // 이메일 인증 코드 생성 함수
+     const generateCode = () => {
       const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       let code = "";
       for (let i = 0; i < 6; i++) {
@@ -49,6 +71,7 @@ exports.postAuth = async (request, response) => {
       return code;
     };
 
+    // 인증 코드 생성
     const verificationCode = generateCode();
 
     // 이메일 발송
@@ -59,33 +82,21 @@ exports.postAuth = async (request, response) => {
       text: `회원가입을 위한 인증 코드는 ${verificationCode} 입니다.`,
     };
 
-    // 이메일 발송 성공 후 응답 보내기
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("이메일 발송 실패:", error);
-        return response.status(500).send("이메일 발송 실패");
-      }
+    // 이메일 발송
+    await transporter.sendMail(mailOptions);
 
-      console.log("이메일 발송 성공:", info);
-      return response.status(200).json({
-        message: "인증 코드가 이메일로 전송되었습니다.",
-        verificationCode,
-      });
+    return response.status(200).json({
+      success: true,
+      message: "인증 코드가 이메일로 전송되었습니다.",
+      verificationCode: verificationCode
     });
-
-    // 비밀번호 해싱
-    const hashPassword = await bcrypt.hash(password, 10);
-    console.log(hashPassword);
-
-    // 사용자 정보 DB에 저장
-    await database.pool.query(
-      "INSERT INTO users (email, password, birth_date) VALUES ($1, $2, $3)",
-      [email, hashPassword, birth_date]
-    );
-
   } catch (error) {
-    console.error("회원가입 중 오류 발생:", error);
-    return response.status(500).json({ msg: "회원정보 입력 오류: " + error });
+    console.error("이메일 발송 실패:", error);
+    return response.status(500).json({ 
+      success: false,
+      message: "이메일 발송에 실패했습니다.",
+      error: error.message  
+    });
   }
 };
 
