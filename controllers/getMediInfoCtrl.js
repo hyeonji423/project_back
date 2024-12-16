@@ -5,8 +5,8 @@ exports.searchMediInfo = async (request, response) => {
   console.log(term);
   try {
     const results = await database.pool.query(
-      "SELECT * FROM medi_info WHERE 효능 LIKE $1 OR 주요증상 LIKE $1;",
-      [term]
+      "SELECT * FROM medi_info WHERE 효능 LIKE $1 OR 제품명 LIKE $1 LIMIT 20",
+      [`%${term}%`]
     );
 
     return response.status(200).json(results.rows);
