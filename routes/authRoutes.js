@@ -7,7 +7,7 @@ const upload = require("./upload");
 router.post("/register", upload.single("profile_img"), postAuth);
 router.post("/login", postLogin);
 router.post("/emailVerification", sendEmailVerification);
-router.put("/update_user", updateAuth);
+router.put("/update_user/:id", updateAuth);
 router.delete("/delete_user/:id", deleteAuth);
 
 

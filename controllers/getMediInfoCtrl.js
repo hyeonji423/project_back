@@ -18,7 +18,7 @@ exports.searchMediInfo = async (request, response) => {
 
 exports.getMediInfo = async (request, response) => {
   try {
-    const results = await database.pool.query("SELECT * FROM medi_info");
+    const results = await database.pool.query("SELECT * FROM medi_info LIMIT 50");
 
     return response.status(200).json(results.rows);
   } catch (error) {

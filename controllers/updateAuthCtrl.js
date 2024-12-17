@@ -18,7 +18,7 @@ exports.updateAuth = async (request, response) => {
       ]
     );
 
-    return response.status(201).json({ msg: "회원정보가 수정되었습니다." });
+    return response.status(200).json({ msg: "회원정보가 수정되었습니다." });
   } catch (error) {
     return response.status(500).json({ msg: "데이터 입력 에러: ", error });
   }
