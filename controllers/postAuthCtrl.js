@@ -36,7 +36,7 @@ exports.postAuth = async (request, response) => {
       [email, hashPassword, birth_date]
     );
 
-    return response.status(200).json({ msg: "회원가입 성공", success: true });
+    return response.status(200).json({ msg: "회원가입이 완료되었습니다.", success: true });
 
   } catch (error) {
     console.error("회원가입 중 오류 발생:", error);
