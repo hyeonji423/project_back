@@ -8,7 +8,6 @@ exports.searchMediInfo = async (request, response) => {
       "SELECT * FROM medi_info WHERE 효능 LIKE $1 OR 제품명 LIKE $1 LIMIT 20",
       [`%${term}%`]
     );
-
     return response.status(200).json(results.rows);
   } catch (error) {
     console.error("검색 오류:", error);
