@@ -2,7 +2,7 @@ const database = require("../database/database");
 const bcrypt = require("bcrypt");
 
 exports.updateAuth = async (request, response) => {
-  const { email, password, birth_date } = request.body;
+  const { email, password } = request.body;
 
     
   try {
@@ -10,10 +10,9 @@ exports.updateAuth = async (request, response) => {
     const hashPassword = await bcrypt.hash(password, 10);
 
     await database.pool.query(
-      "UPDATE users SET password = $1, birth_date = $2 WHERE email = $3",
+      "UPDATE users SET password = $1, WHERE email = $2",
       [
         hashPassword,
-        birth_date,
         email
       ]
     );
