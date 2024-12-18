@@ -1,8 +1,10 @@
 const database = require("../database/database");
 
 exports.searchMediInfo = async (request, response) => {
-  const { term } = request.query;
-  console.log(term);
+  let { term } = request.query;
+  // "약" 글자가 끝에 있으면 제거
+  term = term.endsWith('약') ? term.slice(0, -1) : term;
+  
   try {
     const results = await database.pool.query(
       "SELECT * FROM medi_info WHERE 효능 LIKE $1 OR 제품명 LIKE $1 OR 주성분 LIKE $1 LIMIT 20",
