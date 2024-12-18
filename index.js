@@ -8,10 +8,9 @@ const myPageRouter = require("./routes/myPageRoutes");
 const emailRouter = require("./routes/emailRoutes");
 const searchRouter = require("./routes/searchRoutes");
 const spawn = require("child_process").spawn;
-const swaggerUi = require('swagger-ui-express');
-const YAML = require('yamljs');
-const swaggerDocument = YAML.load('./swagger.yaml');
-
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("yamljs");
+const swaggerDocument = YAML.load("./swagger.yaml");
 
 const app = express();
 
@@ -33,12 +32,12 @@ app.use("/email", emailRouter);
 
 // -- 이 사이에 챗봇 경로 추가해 주세요
 
-app.post("/chat", (request, response) => {
+app.post("/chat1", (request, response) => {
   try {
     const { question } = request.body;
     console.log(question);
 
-    const scriptPath = path.join(__dirname, "chat.py");
+    const scriptPath = path.join(__dirname, "chat1.py");
     const phythonPath = "python";
 
     const result = spawn(phythonPath, [scriptPath, question]);
