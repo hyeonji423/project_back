@@ -103,20 +103,16 @@ exports.sendEmailVerification = async (request, response) => {
 
 exports.postLogin = async (request, response) => {
   const { email, password } = request.body;
-  // console.log(email, password);
 
   try {
-    // JWT_SECRET 값 확인을 위한 콘솔 로그 추가
     console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
-    // 1. 이메일 존재 여부 확인
     const result = await database.pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
 
     if (result.rows.length === 0) {
-      // 이메일이 없는 경우
       return response
         .status(200)
         .json({ msg: "존재하지 않는 사용자 입니다.", success: false });
@@ -143,10 +139,87 @@ exports.postLogin = async (request, response) => {
       { expiresIn: "3h" }
     );
 
-    // console.log(token);
-
     return response.status(201).json({ token, msg: "로그인 성공" });
   } catch (error) {
     return response.status(500).json({ msg: "로그인 실패: " + error });
+  }
+}; // postLogin 함수 끝
+  
+exports.findPwd = async (req, res) => {
+  const { email } = req.body;
+  
+  try {
+    // 사용자 존재 여부 확인
+    const result = await database.pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    }
+
+    // 비밀번호 재설정 토큰 생성
+    const token = jwt.sign(
+      { userId: result.rows[0].id }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '1h' }
+    );
+
+    // 이메일 전송 설정
+    const transporter = nodemailer.createTransport({
+      host: "smtp.naver.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    // 실제 프론트엔드 URL로 변경 필요
+    const resetUrl = `http://localhost:3000/resetpwd?token=${token}`;
+
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: '비밀번호 재설정',
+      html: `
+        <h1>비밀번호 재설정</h1>
+        <p>아래 링크를 클릭하여 비밀번호를 재설정하세요:</p>
+        <a href="${resetUrl}">비밀번호 재설정하기</a>
+        <p>이 링크는 1시간 동안만 유효합니다.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    return res.json({ message: '비밀번호 재설정 이메일을 발송했습니다.' });
+  } catch (error) {
+    return res.status(500).json({ error: '이메일 발송 실패: ' + error.message });
+  }
+};
+
+exports.resetPwd = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    // 토큰 검증
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // 비밀번호 해싱
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // DB에서 비밀번호 업데이트
+    await database.pool.query(
+      "UPDATE users SET password = $1 WHERE id = $2",
+      [hashedPassword, decoded.userId]
+    );
+
+    return res.json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: '유효하지 않거나 만료된 토큰입니다.' });
+    }
+    return res.status(500).json({ error: '비밀번호 재설정 실패: ' + error.message });
   }
 };
