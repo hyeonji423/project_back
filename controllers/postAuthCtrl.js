@@ -1,10 +1,7 @@
 const database = require("../database/database");
-const { v4: uuid4 } = require("uuid"); // 랜덤 문자열 생성 모듈
-const path = require("path"); // 경로 지정 모듈
-const fs = require("fs"); // 파일 생성 등 컨트롤 모듈
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-// const ROOT_PATH = "http://localhost:8000";
+
 
 const nodemailer = require('nodemailer');
 require('dotenv').config();
