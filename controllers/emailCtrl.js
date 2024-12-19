@@ -111,10 +111,10 @@ cron.schedule("0 9 * * *", async () => {
     await database.pool.query(
       `
       INSERT INTO error_logs
-      (error_message, error_date)
-      VALUES ($1, NOW())
+      (error_message, error_date, stack_trace)
+      VALUES ($1, NOW(), $2)
     `,
-      [error.message]
+      [error.message, error.stack] 
     );
   }
 });
