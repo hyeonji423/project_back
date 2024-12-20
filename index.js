@@ -17,28 +17,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
-
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/", (req, res) => {
   res.send("auth server test running");
 });
 
-app.use("/auth", authRouter); 
-app.use("/myPage", myPageRouter); 
+app.use("/auth", authRouter);
+app.use("/myPage", myPageRouter);
 app.use("/medicine", searchRouter);
 app.use("/email", emailRouter);
 
-// 챗봇 경로 
+// 챗봇 경로
 
 app.post("/chat1", (request, response) => {
   try {
     const { question } = request.body;
-    console.log(question);
+    // console.log(question);
 
+    // const scriptPath = path.join(__dirname, "chat1.py");
+    // const phythonPath = "python";
     const scriptPath = path.join(__dirname, "chat1.py");
-    const phythonPath = "python";
+    const phythonPath = path.join(
+      "/home/ubuntu/miniconda",
+      "envs",
+      "myenv",
+      "bin",
+      "python3"
+    );
 
     const result = spawn(phythonPath, [scriptPath, question]);
 
