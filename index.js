@@ -35,10 +35,19 @@ app.use("/email", emailRouter);
 app.post("/chat1", (request, response) => {
   try {
     const { question } = request.body;
-    console.log(question);
+    // console.log(question);
 
+    // const scriptPath = path.join(__dirname, "chat1.py");
+    // const phythonPath = "python";
+
+    const phythonPath = path.join("/home/ubuntu/miniconda",
+      "envs",
+      "myenv",
+      "bin",
+      "python3"
+    );
     const scriptPath = path.join(__dirname, "chat1.py");
-    const phythonPath = "python";
+    
 
     const result = spawn(phythonPath, [scriptPath, question]);
 
