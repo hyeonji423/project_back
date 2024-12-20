@@ -25,12 +25,12 @@ app.get("/", (req, res) => {
   res.send("auth server test running");
 });
 
-app.use("/auth", authRouter); // http://localhost:8000/auth
-app.use("/myPage", myPageRouter); // http://localhost:8000/myPage
+app.use("/auth", authRouter); 
+app.use("/myPage", myPageRouter); 
 app.use("/medicine", searchRouter);
 app.use("/email", emailRouter);
 
-// -- 이 사이에 챗봇 경로 추가해 주세요
+// 챗봇 경로 
 
 app.post("/chat1", (request, response) => {
   try {

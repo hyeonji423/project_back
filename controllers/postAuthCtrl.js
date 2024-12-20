@@ -116,7 +116,8 @@ exports.postLogin = async (request, response) => {
     }
 
     // 2. 비밀빈호 복호화, 비밀번호 일치 여부 확인
-    const isMatch = await bcrypt.compare(password, result.rows[0].password); // 첫번째 파라미터는 입력 받은 비밀번호, 두번째 파라미터는 데이터베이스에 있는 암호화된 비밀번호 - 비교해서 맞으면 true, 틀리면 false
+    const isMatch = await bcrypt.compare(password, result.rows[0].password); 
+    // 첫번째 파라미터는 입력 받은 비밀번호, 두번째 파라미터는 데이터베이스에 있는 암호화된 비밀번호 - 비교해서 맞으면 true, 틀리면 false
 
     if (!isMatch) {
       // 비밀번호가 틀린경우
@@ -174,7 +175,6 @@ exports.findPwd = async (req, res) => {
       },
     });
 
-    // 실제 프론트엔드 URL로 변경 필요
     const resetUrl = `http://localhost:3000/resetpwd?token=${token}`;
 
     const mailOptions = {
@@ -203,7 +203,6 @@ exports.resetPwd = async (req, res) => {
     // 토큰 검증
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     
     // DB에서 비밀번호 업데이트
