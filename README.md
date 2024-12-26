@@ -68,7 +68,9 @@ $ npm run start
 ```bash
 │
 └── back : 백엔드
-    │ 
+    │
+    ├── README.md
+    │
     ├── database : 데이터베이스 관련 정보 폴더
     │   ├── database.js : 기본 개발 환경(NODE_ENV = development)에서 database 설정 파일
     │   └─── db.sql
